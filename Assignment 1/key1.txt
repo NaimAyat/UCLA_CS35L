@@ -1,0 +1,107 @@
+Naim Ayat
+CS 35L Assignment 1 
+Homework: Learning to use Emacs
+April 7, 2017
+
+Exercise 1.1: Moving around in Emacs
+2.) C-s p u b l i c Enter
+3.) C-s l a b o r a t o r y M-LeftArrow
+4.) C-s s e l f - r e f e r e n t i a l M-leftArrow M-leftArrow
+5.) C-s a r r o w M-leftArrow
+6.) C-e
+7.) C-a
+8.) Yes, I used purely hotkeys to navigate.
+9.) No, I did not use the arrow keys.
+10.) C-x C-c
+    Note: each command in this answer was found on the GNU Emacs Reference Card.
+
+Exercise 1.2: Deleting text in Emacs
+2.) M-g M-g 1 8 Enter C-k C-k
+3.) C-s D E L E T E M E C-a C-k C-k
+4.) C-s < ! - C-a C-k C-k C-k C-k C-k C-k
+5.) C-s < ! - Enter Backspace Backspace Backspace Delete Delete Delete Delete
+6.) C-s < ! - C-a C-k Backspace C-x C-c
+    Note: each command in this answer was found on the GNU Emacs Reference Card
+    or on GNU.org.
+
+Exercise 1.3: Inserting text in Emacs
+2.) M-% A s s i g n m e n t 1 Enter A s s i g n m e n t 3 7 Enter y y Enter
+3.) M-< M-% U T F - 8 Enter U S - A S C I I Enter y Enter
+4.) M-< C-s < / o l > C-a Enter
+5.) C-x C-c
+    Note: each command in this answer was found on the GNU Emacs Reference Card
+    or on GNU.org.
+
+Exercise 1.4: Other editing tasks in Emacs
+3-4.) M-> C-p C-f C-Space C-e M-w M-< C-s < / h t m l > C-e Enter C-y
+      C-s - < ! C-b C-b C-Space C-e M-w M-< C-s L a b o r a t o r y C-n Enter C-y
+      M-> C-r D E L E T E M E C-a C-f C-Space C-e M-w M-< C-s H o m e w o r k C-n Enter C-y
+      M-> C-r < ! - - - C-Space C-e C-b C-b C-b C-b C-b M-w C-a C-r l i n e s C-f C-f C-f C-f C-f C-y
+      M-> C-r Y o u C-a C-f C-Space C-n C-n C-e M-w C-r S u b m i t C-r C-r C-n Enter C-y
+5.) M-> C-Space C-r e x e r 1 C-a C-w
+6.) C-u C-x u
+7.) < ! - - M-> - - >
+8.) M-< M-% < o l > Enter < O l > Enter !   
+    Note: There were 7 instances of <ol>.
+
+Exercise 1.5: Doing commands in Emacs
+1.) M-x d i r e d Enter + junk Enter Enter
+2.) C-x C-f h e l l o . c Enter
+3.) M-x c o m p i l e Enter Backspace Backspace Backspace Backspace Backspace Backspace Backspace Backspace g c c Space h e l l o . c Enter 
+4.) C-x h e l l o - o u t Enter C-u M-! ./a.out
+5.)
+#include <stdio.h>
+int
+main (void)
+{
+  char n = '\n';
+  char b = '\\';
+  char q = '"';
+  char const *p = "#include <stdio.h>%cint%cmain (void)%c{%c  char n = '%cn';%c  char b = '%c%c';%c  char q = '%c';%c  char const *p = %c%s%c;%c  printf (p, n, n, n, n, b, n, b, b, n, q, n, q, p, q, n, n, n, n);%c  return 0;%c}%c";
+  printf (p, n, n, n, n, b, n, b, b, n, q, n, q, p, q, n, n, n, n);
+  return 0;
+}
+
+Exercise 1.6: Running Elisp code
+1.) C-x b Enter
+2.) ( r a n d o m ) C-j
+    Note: this yields -737004071327947834.
+3.) ( s e t q Space x Space ( r a n d o m ) ) C-j Enter ( s e t q Space y Space ( r a n d o m ) ) C-j
+    Note: this yields -1000278277145540493 and -407454645627560705, respectively.
+4.) (* Space x Space y) C-j
+    Note: this yields -78828042525770099. 
+          This is obviously incorrect, since the actual answer should be positive.
+5.) M-: (* Space x Space y) Enter
+    Note: This also yields -78828042525770099, but it adds its 
+    octadecimal and hexadecimal values (#o173477445003672277215, #x1ee7f2501ee97e8d).
+6.) The integers aren't truly random in a mathematical sense. 
+    A truly random number can be of any magnitude, but these numbers 
+    have a magnitude that is limited by the computer's memory. Moreover,
+    random number generators use predefined seeds and mathematical formulas 
+    to generate their "random" results, so no computer-generated number is 
+    ever truly random.
+7.) Because the maximum size for a signed integer on a 64-bit system is 2^63-1,
+    the product of two numbers will be incorrect when the result must exceed this.
+    Thus, we must find the probability that two independent random integers, x
+    and y, each generated between the range (-(2^63-1), (2^63-1)), have a product
+    with an absolute value which is less than 2^63-1.
+    Let's call the range for these random integers (-L, L) instead of (-(2^63-1), (2^63-1)).
+    The area of the square such that -L<x<L and -L<y<L is 2L*2L, or 4L^2.
+    Consider the area of the box that lies above the hyperbola y=L/x, from x=1 to x=L.
+    Note that this area represents the probability that x*y>L in the case that x and y
+    are both positive.
+    To get this area, we do A = definiteIntegral[L - L/x] from 1 to L.
+    We find A = L(L-1-ln L).
+    Now consider there is an equal and opposite hyperbola in the 4th quadrant for y=L/x from 
+    x=-L to x=-1, representing the probability that x*y>L when x and y are both negative.
+    Thus, the probability that a randomly selected point within the square x*y of area 4L^2 
+    is on the outside of either parabola is 2A/(4L^2) = (L-1-ln L)/2L. 
+    There are two more cases we need to account for: 
+    1. When x is negative and y is positive.
+    2. When x is positive and y is negative.
+    For these two cases, there are areas of equal size in the 2nd and 4th quadrants 
+    respectively for the hyperbola y=-L/x, meaning x*y<-L. Therefore, we now get the 
+    probability that x*y exceeds either L or -L is 4A/(4L^2) = A/(L^2) = (L-1-ln L)/L. 
+    Thus, plugging in 2^63-1 for L, we conclude that the probability of NOT having overflow 
+    is approximately [4.8*10^-18]. Conversely, we get that the probability of overflow 
+    is [1-(4.8*10^-18)], which is understandably close to 100%.
