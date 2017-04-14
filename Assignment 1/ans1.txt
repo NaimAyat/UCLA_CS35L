@@ -1,5 +1,4 @@
 Naim Ayat
-UID: 104733125
 CS 35L Assignment 1 
 Laboratory: Linux and Emacs scavenger hunt
 April 7, 2017
