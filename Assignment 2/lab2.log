@@ -1,0 +1,190 @@
+Naim Ayat
+CS 35L Assignment 2
+Laboratory: Spell-checking Hawaiian
+April 15, 2017
+
+To check that I'm in the standard C locale, I can use the command:
+	locale
+
+The output is:
+	LC_CTYPE="en_US.UTF-8"
+which is not what I want.
+
+Therefore, I must use the shell command:
+	export LC_ALL='C'
+to fix this.
+
+Checking the "locale" command again, I get:
+	LC_CTYPE="C"
+I am now in the standard C locale.
+
+I run the command:
+	sort -u /usr/share/dict/words > words
+to create "words", which is a file containing a sorted list 
+of English words.
+
+Now I do:
+	wget http://web.cs.ucla.edu/classes/spring17/cs35L/assign/assign2.html
+which saves the webpage to assign2.html.
+
+I run the following commands:
+
+	tr -c 'A-Za-z' '[\n*]' < assign2.html
+This converts non-letters to newlines.
+
+	tr -cs 'A-Za-z' '[\n*]' < assign2.html
+This does the same as the previous, but deletes empty lines.
+
+	tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort
+This sorts each word by ASCII in the webpage and puts them on new 
+lines.
+
+	tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u
+This does the same as the previous, but only outputs one 
+occurrence of each word.
+
+	tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm - words
+This outputs three columns. The 1st contains words unique to assign2.html.
+The 2nd contains words unique to the words file. The 3rd column 
+contains words that both files have in common. Lines are sorted by ASCII.
+
+	tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm -23 - words
+This removes the 2nd and 3rd columns from the previous command and simply
+outputs words unique to assign2.html.
+
+Now I run the command:
+	wget http://mauimapp.com/moolelo/hwnwdseng.htm
+to download the Hawaiian dictionary to a file called hwnwdseng.htm.
+
+Now I do: 
+	grep -E '<td>.*<\/td>' hwnwdseng.htm > out1.htm
+which removes everything except for <td>word</td> and some instances
+of <td></td> and writes them to out1.htm
+
+Next, I do:
+	sed '/<td><\/td>/d' out1.htm > out2.htm
+which removes remaining <td></td> occurrences and puts the
+remaining content in out2.htm.
+
+Next:
+	sed 's/<td>\(.*\)<\/td>/\1/g' out2.htm > out3.htm
+removes the <td> and </td> tags that surround the words. The words
+are written to out3.htm.
+
+Next:
+	sed -n 2~2p out3.htm > out4.htm
+extracts only the column of Hawaiian words and writes it to out4.htm.
+
+Next:
+	sed 's/<u>\(.\)<\/u>/\1/g' out4.htm > out5.htm
+removes <u> tags and writes the remainder to out5.htm.
+
+Next:
+	tr , '\n' < out5.htm > out6.htm
+replaces spaces and commas with newlines and writes the result to out6.htm.
+
+Next:
+	sed 's/^[ \t]*//' out6.htm > out7.htm
+removes space at the beginning of lines and writes the result to out7.htm.
+
+Next:
+	tr ' ' '\n' < out7.htm | sed '/^$/d' > out8.htm
+makes ^$ the beginning and ends of lines and writes the output to out8.htm.
+
+Next:
+	sed "s/\`/'/g" out8.htm > out9.htm
+replaces all ` (ASCII grave accent) with ' (ASCII apostrophe, which
+we'll use to represent okina) and writes the result to out9.htm.
+
+Next:
+	tr A-Z a-z < out9.htm >out10.htm
+replaces uppercase letters with their lowercase counterparts.
+The result is written to out10.htm.
+
+Next:
+	sed "/[^pkmnwlhaeiou']/d" out10.htm > out11.htm
+deletes all entries that contain non-Hawaiian letters.
+
+Finally: 
+	sort -u out11.htm > hwords
+sorts the Hawaiian words in ASCII order, removes duplicates,
+and puts the result in hwords.
+
+Now, I need to put all of the above commands into one bash script.
+
+To do this, I run the command:
+	emacs buildwords
+and enter the following:
+	#!/bin/bash
+	grep -E '<td>.*<\/td>' | \
+	sed '/<td><\/td>/d' | \
+	sed 's/<td>\(.*\)<\/td>/\1/g' | \
+	sed -n 2~2p | \
+	sed 's/<u>\(.\)<\/u>/\1/g' | \
+	tr , '\n' | \
+	sed -e 's/^[ \t]*//' | \
+	tr ' ' '\n' | \
+	sed '/^$/d' | \
+	sed "s/\`/'/g" | \
+	tr A-Z a-z | \
+	sed "/[^pkmnwlhaeiou']/d" | \
+	sort -u
+Now, I save buildwords (C-X C-S) and exit to the shell.
+
+Now I give myself permission to execute buildwords:
+	chmod u+x buildwords
+
+To test my script, I run:
+	./buildwords < hwnwdseng.htm > hwords
+which should extract only the Hawaiian words from hwnwdsendg.htm,
+my original download of the English/Hawaiian dictionary,and place 
+the result in hwords.
+
+Checking the output with:
+	cat hwords
+I see that my script succeeded. 
+hwords contains nothing but one column of Hawaiian words.
+
+Now I run:
+	tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pkmnwlhae'iou" \
+	"[\n*]" | sort -u | comm -23 - hwords > HWspell.txt
+to check the Hawaiian spellings on assign2.html, the original webpage.
+The output file, HWspell.txt, therefore contains a single column listing
+the "Hawaiian words" that are "misspelled" in assign2.html. In reality,
+these are simply words that happen to contain only Hawaiian letters and do not
+match anything in the hwords. Some examples of words contained in this file 
+(obtained by the command "cat HWspell.txt") are paul, people, and mail.
+
+Now I run:
+	tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pkmnwlhae'iou" \
+	"[\n*]" | sort -u | comm -23 - hwords | wc -l
+to see there are 198 "Hawaiian words" that are "misspelled" in assign2.html.
+
+Now I run:
+	tr '[:upper:]' '[:lower:]' < hwords | tr -cs "pkmnwlhae'iou" \
+	"[\n*]" | sort -u | comm -23 - hwords | wc -l
+to see there are 0 Hawaiian misspellings in hwords, which confirms that the
+buildwords script worked properly.
+
+Now I run:
+	tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs 'A-Za-z' '[\n*]' \
+	| sort -u | comm -23 - words > ENspell.txt
+to check the English spellings on assign2.html, the original webpage.
+The output file, ENspell.txt, therefore contains a single column listing
+the English words "misspelled" in assign2.html. Examples of words contained
+in this file (obtained by the command "cat HWspell.txt") are: seasnet, wiki,
+and eggert.
+
+Now I run:
+	tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs 'A-Za-z' '[\n*]' \
+	| sort -u | comm -23 - words | wc -l
+to see there are 39 English words that are "misspelled" in assign2.html.
+Note that "misspelled" simply means "not contained in the words file".
+
+To check words marked as misspelled in English but not Hawaiian:
+	comm -23 ENspell.txt HWspell.txt
+Some examples from the output are: wikipedia, ctype, and buildwords.
+
+To check words marked as misspelled in Hawaiian but not English:
+	comm -13 ENspell.txt HWspell.txt
+Some examples from the output are: like, paul, and all.

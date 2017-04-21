@@ -1,0 +1,76 @@
+#!/bin/bash
+
+D=$1
+#cd "$D"
+
+# sorted list of priority files that begin with a .
+priority_files=`ls -a $D | grep '^\.\+[^\.]' | sort`
+
+# sorted list of files that don't begin with a .
+other_files=`ls $D | sort`
+
+# combine both lists into an array
+declare -a ARR_FILES
+let count=0
+
+# iterate through priority_files
+IFS=$'\n' # for when files contain spaces
+let i=0
+for FILE in $priority_files
+# check if regular file
+do
+    if [ ! -L "$D/$FILE" ]
+    then	
+        if [ -f "$D/$FILE" ]
+        then
+            # if regular, add to ARR_FILES
+            ARR_FILES[$i]="$D/$FILE"
+            let i=i+1
+        fi
+    fi
+done
+
+# iterate through other_files
+IFS=$'\n'
+for FILE in $other_files
+do
+    if [ ! -L "$D/$FILE" ]
+    then
+        if [ -f "$D/$FILE" ]
+        then
+            # if regular, add to ARR_FILES
+            ARR_FILES[$i]="$D/$FILE"
+            let i=i+1
+        fi
+    fi
+done
+
+let count=i
+
+# at this point, we have:
+# count = total regular files
+# ARR_FILES = array of regular files
+
+# iterate through array of regular files
+let i=0
+while [ $i -lt $count ]
+do
+    if [ -r "${ARR_FILES[$i]}" ] # read permission OK?
+    then
+        let next=$i+1
+        while [ $next -lt $count ]
+        # nested loop to compare files against one another
+        do
+            cmp -s -- "${ARR_FILES[$i]}" "${ARR_FILES[$next]}"
+            if [ $? -eq 0 ]
+            then
+                # create hard link from next -> i
+                ln -f -- "${ARR_FILES[$i]}" "${ARR_FILES[$next]}"
+            fi
+            let next=next+1
+        done
+    else
+        echo "Error: read permission denied."
+    fi
+    let i=i+1
+done

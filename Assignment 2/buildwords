@@ -1,0 +1,14 @@
+#!/bin/bash
+grep -E '<td>.*<\/td>' | \
+sed '/<td><\/td>/d' | \
+sed 's/<td>\(.*\)<\/td>/\1/g' | \
+sed -n 2~2p | \
+sed 's/<u>\(.\)<\/u>/\1/g' | \
+tr , '\n' | \
+sed -e 's/^[ \t]*//' | \
+tr ' ' '\n' | \
+sed '/^$/d' | \
+sed "s/\`/'/g" | \
+tr A-Z a-z | \
+sed "/[^pkmnwlhaeiou']/d" | \
+sort -u
