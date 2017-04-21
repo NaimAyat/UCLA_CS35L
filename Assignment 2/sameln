@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#By Naim Ayat
+
+#bash script which serves to replace duplicate files
+#with hard links
+
 D=$1
 #cd "$D"
 
