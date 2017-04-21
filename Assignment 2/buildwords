@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# By Naim Ayat
+
+# reads HTML from standard input and writes a
+# sorted list of unique words to standard output
+
 grep -E '<td>.*<\/td>' | \
 sed '/<td><\/td>/d' | \
 sed 's/<td>\(.*\)<\/td>/\1/g' | \
