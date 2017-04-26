@@ -1,15 +1,15 @@
 #!/usr/bin/python
 
-#comm.py
-#By Naim Ayat
+# comm.py
+# By Naim Ayat
 
-#Accepts two inputs. Outputs three columns.
-#First column contains lines unique to 1st input.
-#Second column contains lines unique to 2nd input.
-#Third column contains common lines.
+# Accepts two inputs. Outputs three columns.
+# First column contains lines unique to 1st input.
+# Second column contains lines unique to 2nd input.
+# Third column contains common lines.
 
-#If files are unsorted, use command -u
-#Example: comm.py -u file1.txt file2.txt
+# If files are unsorted, use command -u
+# Example: comm.py -u file1.txt file2.txt
 
 import random, sys, locale
 from optparse import OptionParser
