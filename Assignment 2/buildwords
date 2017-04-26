@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#buildwords
+# buildwords
 # By Naim Ayat
 
 # reads HTML from standard input and writes a
