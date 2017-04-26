@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
+#comm.py
 #By Naim Ayat
 
-#comm.py
 #Accepts two inputs. Outputs three columns.
 #First column contains lines unique to 1st input.
 #Second column contains lines unique to 2nd input.
