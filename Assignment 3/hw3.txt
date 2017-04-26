@@ -1,0 +1,37 @@
+Naim Ayat
+CS 35L Assignment 3
+Laboratory: Installing a small change to a big package
+April 22, 2017
+
+Q1: No, it was not necessary to remove the line 
+"case_long_iso_time_style:". In the original code,
+this line was actually a duplicate of another case
+in a switch statement. The first occurence of this
+line would have picked up the case if it were to
+occur, meaning that the duplicate line would never
+actually be reached. Brady simply removed an 
+unnecessary line to clean up the code.
+
+Q2: If we have other software that is accustomed to
+reading dates in the Year-Month-Day format, then we'd
+have to rewrite that other software to account for the
+sudden change to a Month/Day/Year format. This could
+be especially problematic if our company operated 
+internationally, since the new format is certainly
+not the global standard.
+
+Q3: Calling randline.py on an empty (null) file returns
+the error message:
+	IndexError: list index out of range.
+This is because the script assumes that the input file
+has some sort of content. Line 274 of the script says:
+	return seq[int(self.random() * len(seq))]  
+	# raises IndexError if seq is empty.
+Therefore, the error message occurs because randline.py 
+attempts to index the file but is not able to.
+
+Q4: Python 3 automatically unpacks tuples, so passing
+the parameters (errno, strerror) as an exception
+in line 65 returns a syntax error. To fix this,
+we could instead pass in a single parameter: 
+a list containing both errno and strerror.

@@ -1,0 +1,88 @@
+Naim Ayat
+CS 35L Assignment 3
+Laboratory: Installing a small change to a big package
+April 22, 2017
+
+I need to try Brady's workaround for the Coreutils
+date problem.
+
+I execute the commands
+	wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz
+	tar -xvzf coreutils-7.6.tar.gz
+to download Coreutils 7.6 and "un-tar" it.
+
+Then I do 
+	cd coreutils-7.6
+	to enter the Coreutils directory and
+	emacs INSTALL
+to read the installation instructions.
+
+Now I do 
+	./configure --prefix=/u/cs/ugrad/naim/coreutils-install
+to configure a directory for my Coreutils installation.
+
+The filesystem is ready for installation, so I can do
+	make
+	make install
+to install Coreutils in the aforementioned directory.
+
+Now I do 
+	cd /u/cs/ugrad/naim/coreutils-install
+	ls
+to check that Coreutils installed correctly.
+
+I enter the Coreutils bin directory with
+	cd /u/cs/ugrad/naim/coreutils-install/bin 
+and execute
+	export LC_ALL='en_US.UTF-8'
+	./ls -l 
+to check if I get the YYYY-MM-DD date instead of the
+traditional Unix date, which I do.
+
+Therefore, we must patch the date formatting problem.
+
+I use
+	cd ..
+to return to the coreutils-install directory.
+
+Now I execute
+	emacs bradyPatch
+and copy the text from Brady's patch into this file.
+
+I execute
+	patch -p1 < bradyPatch
+to patch the date problem.
+
+Now I do 
+	make
+which re-makes a verson of coreutils with the patch.
+
+I return to the ~ directory with 
+	cd ~
+
+To test the patch, I do
+	./coreutils-7.6/src/ls -l ./coreutils-7.6.tar.gz
+which returns the current date in the proper Unix 
+format, Month/Day/Year.
+
+Now I do
+	touch -t 198801010100 coreutils-7.6.tar.gz
+to change the date on the file to Jan 1, 1988.
+
+Again, I do 
+	./coreutils-7.6/src/ls -l ./coreutils-7.6.tar.gz
+which returns the Jan 1, 1988 date in the proper
+Unix format, Month/Day/Year.
+
+Finally, I check that the unpatched ls funtion
+still exists in bin and returns the incorrect
+date format by doing
+	./coreutils-install/bin/ls -l ./coreutils-7.6.tar.gz
+As expected, this returns the Jan 1, 1998 date in 
+the problematic format, Year-Month-Date.
+
+We've successfully patched the Coreutils ls function.
+The new ls function exists in 
+/coreutils-7.6/src
+and the old ls function exists in
+/coreutils-install/bin.
