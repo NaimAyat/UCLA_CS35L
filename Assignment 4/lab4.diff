@@ -1,0 +1,21 @@
+2017-04-28  Naim Ayat  <naim@lnxsrv06.seas.ucla.edu>
+
+* timespec.h (timespec_cmp): fixed overflow error
+
+--- OGtimespec.h	2017-04-28 20:15:13.888154000 -0800
++++ timespec.h	2017-04-28 21:02:33.318952000 -0800
+@@ -45,8 +45,12 @@
+ static inline int
+ timespec_cmp (struct timespec a, struct timespec b)
+ {
+-  int diff = a.tv_sec - b.tv_sec;
+-  return diff ? diff : a.tv_nsec - b.tv_nsec;
++  if (a.tv_sec > b.tv_sec)
++    return 1;
++  else if (a.tv_sec < b.tv_sec)
++    return -1;
++  else
++    return 0;
+ }
+ 
+ # if ! HAVE_DECL_NANOSLEEP

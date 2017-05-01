@@ -1,0 +1,158 @@
+Naim Ayat
+CS 35L Assignment 4
+Laboratory: Debugging a C program
+April 29, 2017
+
+Starting in my default directory (~), I need to download 
+the old version of Coreutils by executing the command
+	wget http://web.cs.ucla.edu/classes/spring17/cs35L/assign/coreutils-with-bug.tar.gz
+
+Then I do 
+	tar -xvzf coreutils-with-bug.tar.gz
+to "un-tar" the file.
+
+Now I do 
+	cd coreutils-with-bug
+to enter my newly-made Coreutils directory.
+
+I need to make the file with the commands
+	./configure
+	make
+
+As expected, we get an error after executing "make":
+______________________________________________________________________________
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was 
+here extern int futimens (int __fd, const struct timespec __times[2]) 
+__THROW;
+            ^
+make[3]: *** [utimecmp.o] Error 1
+make[3]: Leaving directory `/w/home.13/cs/ugrad/naim/coreutils-with-bug/lib'
+make[2]: *** [all] Error 2
+make[2]: Leaving directory `/w/home.13/cs/ugrad/naim/coreutils-with-bug/lib'
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory `/w/home.13/cs/ugrad/naim/coreutils-with-bug'
+make: *** [all] Error 2
+______________________________________________________________________________
+
+To fix this, I return to the default directory with
+	cd ..
+and download the patch with
+	wget http://web.cs.ucla.edu/classes/spring17/cs35L/assign/coreutils.diff
+
+Now we move the patch to our Coreutils directory with
+	mv coreutils.diff coreutils-with-bug
+
+I return to the Coreutils directory with
+	cd coreutils-with-bug
+and apply the patch with
+	patch -p0 < coreutils.diff
+
+We observe the following output:
+______________________________________________________________________________
+patching file lib/utimens.c
+patching file lib/utimens.h
+patching file src/copy.c
+patching file src/tee.c
+patching file src/touch.c
+______________________________________________________________________________
+
+Since the patch was successful, we can now do
+	make
+and see that there are no errors.
+
+Now we use the commands outlined in the assignment spec:
+	tmp=$(mktemp -d)
+	cd $tmp
+	touch -d '1918-11-11 11:00 GMT' wwi-armistice
+	touch now
+	sleep 1
+	touch now1
+to create three files, one with a creation time from the year 1918
+and two with recent creation times.
+
+Now we check our patched ls command with 
+	TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+and see that we get the proper output:
+______________________________________________________________________________
+-rw-r--r-- 1 naim csugrad 0 2017-04-28 21:56:59.464647161 +0000 now1
+-rw-r--r-- 1 naim csugrad 0 2017-04-28 21:56:50.362340936 +0000 now
+-rw-r--r-- 1 naim csugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+______________________________________________________________________________
+
+Now we check the buggy ls command with
+	TZ=UTC0 ~/coreutils-with-bug/src/ls -lt --full-time wwi-armistice now now1
+and see the output:
+______________________________________________________________________________
+-rw-r--r-- 1 naim csugrad 0 1918-11-11 11:00:00.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 naim csugrad 0 2017-04-28 14:56:59.464647161 -0700 now1
+-rw-r--r-- 1 naim csugrad 0 2017-04-28 14:56:50.362340936 -0700 now
+______________________________________________________________________________
+
+As expected, this is incorrect. We want the file from 
+1918 to be on the bottom.
+
+We can now use gdb to debug the old version of Coreutils. 
+
+In the directory /tmp, I do
+	gdb ~/coreutils-with-bug/src/ls
+to start gdb.
+
+Now I use 
+	info functions
+too check if there is a useful function for this situation.
+
+I run commands in gdb as follows:
+	break compare_mtime
+	list
+	si
+
+Stepping shows that there is an error in timespec.h at line 48:
+______________________________________________________________________________
+timespec_cmp (struct timespec a, struct timespec b)
+{
+    int diff = a.tv_sec - b.tv_sec;
+    return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+______________________________________________________________________________
+
+This function tries to compare two times, but fails in the case
+of overflow when a.tv_sec is very small (like with a date in 1918).
+
+Therefore, using emacs, I change the function to this:
+______________________________________________________________________________
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  if (a.tv_sec > b.tv_sec)
+        return 1;
+  else if (a.tv_sec < b.tv_sec)
+        return -1;
+  else
+	return 0;
+}
+______________________________________________________________________________
+
+Now, to create a diff called lab4.diff as required by the 
+assignment, I return to by default directory and do
+	diff -u coreutils-with-bug/lib/timespec.h OGtimespec.h > lab4.diff
+where OGtimespec.h is a copy I made of the original timespec.h file.
+
+Then I add a changelog entry as required by the assignment
+and copied it into the diff file with emacs.
+
+Finally, I try to reproduce the problem in my home directory
+on the SEASnet Linux servers by recreating the three files listed 
+above and running
+	ls -lt
+
+I get an erroneous output which lists the WWI Armistice file first,
+displaying a date from 2054 instead of 1918. This is due to the fact
+that SEASnet uses a 32-bit NFS system, while the local Linux system
+uses 64-bit integers. Thus, SEASnet removes the first 32 bits of our
+number, including the sign bit. As a result, a date far in the past
+will be incorrectly represented as a date far into the future.
