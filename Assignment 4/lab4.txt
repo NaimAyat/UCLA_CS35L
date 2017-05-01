@@ -20,6 +20,7 @@ I need to make the file with the commands
 	make
 
 As expected, we get an error after executing "make":
+
 ______________________________________________________________________________
 In file included from utimecmp.c:41:0:
 utimens.h:2:5: error: conflicting types for 'futimens'
@@ -40,6 +41,7 @@ make[1]: Leaving directory `/w/home.13/cs/ugrad/naim/coreutils-with-bug'
 make: *** [all] Error 2
 ______________________________________________________________________________
 
+
 To fix this, I return to the default directory with
 	cd ..
 and download the patch with
@@ -54,6 +56,7 @@ and apply the patch with
 	patch -p0 < coreutils.diff
 
 We observe the following output:
+
 ______________________________________________________________________________
 patching file lib/utimens.c
 patching file lib/utimens.h
@@ -61,6 +64,7 @@ patching file src/copy.c
 patching file src/tee.c
 patching file src/touch.c
 ______________________________________________________________________________
+
 
 Since the patch was successful, we can now do
 	make
@@ -79,20 +83,24 @@ and two with recent creation times.
 Now we check our patched ls command with 
 	TZ=UTC0 ls -lt --full-time wwi-armistice now now1
 and see that we get the proper output:
+
 ______________________________________________________________________________
 -rw-r--r-- 1 naim csugrad 0 2017-04-28 21:56:59.464647161 +0000 now1
 -rw-r--r-- 1 naim csugrad 0 2017-04-28 21:56:50.362340936 +0000 now
 -rw-r--r-- 1 naim csugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
 ______________________________________________________________________________
 
+
 Now we check the buggy ls command with
 	TZ=UTC0 ~/coreutils-with-bug/src/ls -lt --full-time wwi-armistice now now1
 and see the output:
+
 ______________________________________________________________________________
 -rw-r--r-- 1 naim csugrad 0 1918-11-11 11:00:00.000000000 -0800 wwi-armistice
 -rw-r--r-- 1 naim csugrad 0 2017-04-28 14:56:59.464647161 -0700 now1
 -rw-r--r-- 1 naim csugrad 0 2017-04-28 14:56:50.362340936 -0700 now
 ______________________________________________________________________________
+
 
 As expected, this is incorrect. We want the file from 
 1918 to be on the bottom.
@@ -113,6 +121,7 @@ I run commands in gdb as follows:
 	si
 
 Stepping shows that there is an error in timespec.h at line 48:
+
 ______________________________________________________________________________
 timespec_cmp (struct timespec a, struct timespec b)
 {
@@ -121,10 +130,12 @@ timespec_cmp (struct timespec a, struct timespec b)
 }
 ______________________________________________________________________________
 
+
 This function tries to compare two times, but fails in the case
 of overflow when a.tv_sec is very small (like with a date in 1918).
 
-Therefore, using emacs, I change the function to this:
+Therefore, using emacs, I change the function to the following:
+
 ______________________________________________________________________________
 timespec_cmp (struct timespec a, struct timespec b)
 {
@@ -136,6 +147,7 @@ timespec_cmp (struct timespec a, struct timespec b)
 	return 0;
 }
 ______________________________________________________________________________
+
 
 Now, to create a diff called lab4.diff as required by the 
 assignment, I return to by default directory and do
