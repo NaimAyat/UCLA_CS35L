@@ -5,7 +5,7 @@
 // negative, zero, or positive depending on whether a is less than, equal to,
 // or greater than b.
 
-// accepts an option -f to ignore character case.
+// also accepts an option -f to ignore character case.
 
 #include <stdio.h>
 #include <sys/stat.h>
