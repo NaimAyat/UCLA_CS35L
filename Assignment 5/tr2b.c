@@ -10,20 +10,20 @@
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
-		fprintf(stderr, "Error: wrong number of args");
+		fprintf(stderr, "Error: wrong number of arguments.");
 		exit(1);
 	}
 	char* from = argv[1];
 	char* to = argv[2];
 	if (strlen(from) != strlen(to)) {
-		fprintf(stderr, "Error: args must be the same length");
+		fprintf(stderr, "Error: arguments must contain the same number of characters.");
 		exit(1);
 	}
 	size_t i, j;
 	for (i = 0; i < strlen(from); i++) {
 		for (j = i + 1; j < strlen(from); j++) {
 			if (from[i] == from[j]) {
-				fprintf(stderr, "Error: first arg cannot contain duplicates");
+				fprintf(stderr, "Error: first (from) argument cannot contain duplicate characters.");
 				exit(1);
 			}
 		}
