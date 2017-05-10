@@ -1,0 +1,52 @@
+I created five text files, each with an eponymous number of lines: 
+	100.txt
+	1000.txt
+	10000.txt	
+	100000.txt
+	1000000.txt
+
+Each line in these files was 
+	'*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4'
+(From the test case in Assignment 4).
+
+I then ran tests with the "time" command for each sfrob, sfrobu, sfrobs, sfrobu -f, and sfrobs -f.
+
+In other words, tests were ran in the style
+	time ./sfrob < 100.txt > output.txt
+
+I condensed the results of these tests in the following table:
+_______________________________________________________________________________________________________________________________
+# lines	|	sfrob 		|	sfrobu		|	sfrobs		|	sfrobu -f	|	sfrobs -f
+_______________________________________________________________________________________________________________________________
+	|  real	|  usr	|  sys	|  real	|  usr	|  sys	|  real	|  usr	|  sys	|  real	|  usr	|  sys	|  real	|  usr	|  sys	
+	|_______|_______|_______|_______|_______|_______|_______|_______|_______|_______|_______|_______|_______|_______|______
+10^2	| 0.003	| 0.002	| 0.000	| 0.016	| 0.003	| 0.012	| 0.007	| 0.004	| 0.002	| 0.014	| 0.002	| 0.009	| 0.007	| 0.002	| 0.003
+10^3	| 0.029	| 0.020	| 0.001	| 0.100	| 0.023	| 0.078	| 0.022	| 0.014	| 0.004	| 0.141	| 0.014	| 0.090	| 0.019	| 0.006	| 0.002
+10^4	| 0.100	| 0.089	| 0.006	| 0.901	| 0.145	| 0.720	| 0.108	| 0.092	| 0.014	| 0.981	| 0.300	| 0.731	| 0.125	| 0.050	| 0.013
+10^5	| 1.310	| 1.201	| 0.023	| 5.666	| 1.083	| 4.631	| 0.703	| 0.599	| 0.040	| 6.773	| 1.519	| 4.245	| 0.731	| 0.801	| 0.038
+10^6	|15.491	|15.345	| 0.198	|55.312	|13.331	|44.001	| 6.559	| 6.213	| 0.278	|59.460 |19.419	|44.719	| 7.991	| 7.441	| 0.239
+_______________________________________________________________________________________________________________________________
+
+We first notice that sfrob is clearly more efficient than sfrobu in every case. This is logical, since sfrob is buffered
+and sfrobu is not. This is consistent with our findings in the lab.
+
+Looking a bit closer, however, we can see that different input sizes are sometimes handled better by different programs.
+For example, sfrob seems to do better with smaller inputs than sfrobs does, but sfrobs does much better than sfrob with the
+largest two inputs.
+
+We also notice that functions with "-f" take longer than their counterparts, since the toupper command adds extra operations.
+
+Finally, I used data gathered from sfrobu to estimate a function for the number of comparisons in terms of input size.
+
+Our data:
+	10^6 input lines = 1900139 comparisons 
+	10^5 input lines = 1519230 comparisons
+	10^4 input lines = 191881 comparisons
+	10^2 input lines = 1103 comparisons
+
+With prior knowledge of sorting algorithms, namely mergesort ( O(nlogn) ), we see that this resembles a logarithmic relationship.
+
+Thus, where
+	C = total comparisons
+	N = input size (in lines described above)
+we can estimate that C = N log N.

@@ -1,0 +1,167 @@
+Naim Ayat
+CS 35L Assignment 5
+Laboratory: Buffered versus unbuffered I/O
+April 6, 2017
+
+For this lab, I wrote two programs (tr2b.c and tr2u.c) that that transliterate 
+text like the standard utility command tr does. However, my programs differ from
+tr in that "they have no options, characters like [, - and \ have no special meaning 
+in the operands, operand errors must be diagnosed, and your implementations act on 
+bytes rather than on (possibly multibyte) characters.. The first , tr2b.c, uses 
+getchar and putchar, while the second, tr2u.c, uses read and write." (Excerpt from
+specification at http://web.cs.ucla.edu/classes/spring17/cs35L/assign/assign5.html).
+
+I wrote the two programs in emacs and compiled them with
+	gcc -o tr2b tr2b.c
+	gcc -o tr2u tr2u.c
+
+Then, I used the command
+	head --bytes=5000000 /dev/urandom > lotsOfBytes.txt
+to create a random file of size 5,000,000 bytes.
+
+First, I tested the buffered program when copying from one file to another:
+	strace -c ./tr2b abc xyz < lotsOfBytes.txt > bOut.txt
+
+I got the output:
+______________________________________________________________________________________
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 53.93    0.000048          48         1           brk
+ 46.07    0.000041          41         1           execve
+  0.00    0.000000           0         2           read
+  0.00    0.000000           0         1           write
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0         9           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000089                    29         1 total
+______________________________________________________________________________________
+
+
+That is, the buffered program made 29 system calls and took 0.000089 seconds.
+
+Then, I compared it to the unbuffered program when copying from one file to another:
+	strace -c ./tr2u abc xyz < lotsOfBytes.txt > bOut.txt
+
+I got the output:
+______________________________________________________________________________________
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.66    4.327437           1   5000000           write
+ 42.34    3.177945           1   5000002           read
+  0.00    0.000077          11         7           mmap
+  0.00    0.000047          47         1           brk
+  0.00    0.000042          42         1           execve
+  0.00    0.000027          14         2           open
+  0.00    0.000019           5         4           mprotect
+  0.00    0.000009           9         1         1 access
+  0.00    0.000008           8         1           munmap
+  0.00    0.000006           3         2           close
+  0.00    0.000006           3         2           fstat
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    7.505626              10000024         1 total
+______________________________________________________________________________________
+
+
+That is, the unbuffered program made 10000024 system calls and took 7.505626 seconds.
+
+This huge gap in efficency is due to the fact that read/write make two calls for each 
+byte in the buffer. Getchar and putchar, of course, make far fewer calls because they 
+are buffered. Therefore, tr2b.c is much faster than tr2u.c.
+
+Then, I compared the two programs when copying to the terminal.
+
+Again, I started with the buffered version:
+	strace -c ./tr2b abc xyz < lotsOfBytes.txt
+
+I got the output:
+______________________________________________________________________________________
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 31.78    0.000068           8         9           mmap
+ 21.50    0.000046          46         1           brk
+ 15.42    0.000033          17         2           read
+  6.54    0.000014           4         4           mprotect
+  4.67    0.000010           5         2           open
+  4.67    0.000010           3         4           fstat
+  4.67    0.000010          10         1         1 access
+  3.74    0.000008           4         2           write
+  3.74    0.000008           8         1           execve
+  2.80    0.000006           6         1           munmap
+  0.47    0.000001           1         2           close
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000214                    30         1 total
+______________________________________________________________________________________
+
+
+That is, the buffered program made 30 system calls and took 0.000214 seconds.
+We observe that this program is slower when copying to the terminal
+than it is when copying to another file.
+
+Finally, I tested the unbuffered version when copying to the terminal.
+	strace -c ./tr2u abc xyz < lotsOfBytes.txt
+
+The output was:
+______________________________________________________________________________________
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.75    8.869521           2   5000000           write
+ 42.25    6.488093           1   5000002           read
+  0.00    0.000045          45         1           execve
+  0.00    0.000038           5         7           mmap
+  0.00    0.000037          37         1           brk
+  0.00    0.000027          14         2           open
+  0.00    0.000021           5         4           mprotect
+  0.00    0.000009           9         1         1 access
+  0.00    0.000008           8         1           munmap
+  0.00    0.000007           4         2           fstat
+  0.00    0.000005           3         2           close
+  0.00    0.000002           2         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   15.357813              10000024         1 total
+______________________________________________________________________________________
+
+
+We can see that the program made 10000024 calls and took 15.357813 seconds. As with 
+its buffered counterpart, this program is much slower writing to the terminal than
+it is to another file.
+
+Then, I used the "time" command for one more comparison test: measuring how much faster 
+the buffered version of the program is compared to the unbuffered version when copying 
+the five-million-byte file to a new file.
+
+Testing the buffered version with
+	time ./tr2b abc xyz < lotsOfBytes.txt > bTime.txt
+we get:
+______________________________________________________________________________________
+
+real 0m0.003s
+user 0m0.000s
+sys 0m0.001s
+______________________________________________________________________________________
+
+
+Testing the unbuffered version with
+	time ./tr2u abc xyz < lotsOfBytes.txt > uTime.txt
+we get:
+______________________________________________________________________________________
+
+real 0m5.659s
+user 0m0.349s
+sys 0m5.264s
+______________________________________________________________________________________
+
+
+Once more, we see that the buffered version performs much better than the unbuffered
+version.
