@@ -1,0 +1,80 @@
+Naim Ayat
+CS 35L Assignment 6
+Laboratory: Multithreaded performance
+April 13, 2017
+
+First, we use the command 
+	sort --version
+to check that the version of Coreutils we're using is new
+enough to support the use of multiple threads. We see that
+our machine is running Coreutils 8.22, which is sufficient.
+
+Now, we use the command 
+	od -An -tf4 -N 40000000 /dev/urandom | tr -s ' ' '\n' | sed '1d' > random
+"-tf4" tells the interpreter to generate numbers of 4 bytes,
+also known as single-precision floating point numbers. Thus,
+we generate a file of 40000000 total bytes, meaning 10000000 
+single-precision floating point numbers. Each number is on a
+new line, since we used the "-s" and "1d" commands.
+
+______________________________________________________________________________
+
+Now we time sort itself:
+	time -p sort -g random > /dev/null
+Output:
+	real 22.20
+	user 112.36
+	sys 0.45
+______________________________________________________________________________
+
+
+Now, we check the time efficiency of sort as we increase the 
+number of threads. More specifically - we will run four more
+tests with 1, 2, 4, and 8 threads, respectively.
+
+______________________________________________________________________________
+
+One thread:
+	time -p sort -g --parallel=1 random > /dev/null
+Output:
+	real 105.23
+	user 105.04
+	sys 0.17
+
+
+Two threads: 
+	time -p sort -g --parallel=2 random > /dev/null
+Output:
+	real 55.37
+	user 105.26
+	sys 0.29
+
+
+Four threads:
+	time -p sort -g --parallel=4 random > /dev/null
+Output:
+	real 31.96
+	user 106.73
+	sys 0.38
+
+
+Eight threads:
+	time -p sort -g --parallel=8 random > /dev/null
+Output:
+	real 20.80
+	user 113.01
+	sys 0.43
+______________________________________________________________________________
+
+
+We observe that user-time stays relatively constant and increases
+only slightly by the time we reach eight threads. System time also
+increases slightly with the addition of new threads, but the 
+difference is negligible. The largest difference, of course,
+is the improvement of real-time performance with the addition
+of new threads. As the number of threads increases, the duration
+of real-time will be shorter.
+
+Finally, we see that sort by itself runs with a similar time
+efficency to our forced eight thread test. Thus, we can conclude
+that sort employs eight threads by default.
