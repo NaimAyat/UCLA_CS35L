@@ -1,0 +1,29 @@
+Naim Ayat
+CS 35L Assignment 7
+Homework: SSH setup and use in applications
+May 20, 2017
+
+1. If other teams were observing the bytes going accross the network, my resulting 
+   network was still secure. When I send bytes to another server, the message is encrypted 
+   by the server owner's public key. Only the server owner will have the private key 
+   neccessary to decrypt the information. Similarly, any data sent to me will be 
+   encrypted by my public key; nobody will be able to decrypt it without the 
+   private key that I solely have access to.
+
+   In the case that other teams tapped my keyboards and had access to my keystrokes, 
+   they would already know what information I was sending even before I sent it. They
+   would also be able to access the password for the private key and decrypt the data.
+   Thus, the server would not be secure in this case.
+
+   In the case that I am booting off USB and other teams had physical control of the USB,
+   the other teams would be able to get my key pair and decrypt all of my data.
+   Thus, it would not be secure in this case either.
+
+2. gpg --verify simply checks for matching public keys and signatures. Therefore,
+   the file can be intercepted mid-transfer, altered, and sent with the alterer's
+   signature. When the file is received, the receiver will use gpg --verify, which
+   will clear the file since its public key and signature match (since both belong 
+   to the alterer). In other words, gpg --verify has no way of verifying that the 
+   received file is truly what the original sender sent. A solution is to use a 
+   computer security company which tracks the original file's data (namely its
+   author) and ensures that it is received without tampering.
