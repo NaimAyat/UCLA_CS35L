@@ -21,7 +21,7 @@ I called it code.c and compiled it with the command
 
 Running it with 
 	./code
-yeilds, of course, the value of cos(sqrt(3.0)), which turns out to be -0.16055653857469052.
+yields, of course, the value of cos(sqrt(3.0)), which turns out to be -0.16055653857469052.
 
 
 Part 2:
