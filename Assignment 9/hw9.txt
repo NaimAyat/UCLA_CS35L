@@ -1,0 +1,47 @@
+Naim Ayat
+CS 35L Assignment 9
+Homework: Change Management
+June 3, 2017
+
+2.) I created a new branch of the Diffutils v3.0 directory with
+	git checkout v3.0 -b quote
+
+3.) I installed my change into the new branch by running
+	patch -p1 < quote-3.0-patch.txt 
+
+4.) I learned that the Emacs add-change-log-entry-other-window  command (C-x 4 a) adds a 
+    new entry to the ChangeLog file for the file currently being edited.
+
+5.) I opened emacs and did (C-x 4 a) to create such a ChangeLog entry.
+
+6.) To commit the changes to the new branch, I did
+	git commit -aF ChangeLog
+    and ensured it was adapted from the original patch.
+
+7.) To generate a new formatted patch file, I did
+	git-format patch -1 --stdout > formatted-patch.txt
+
+8.) To create a new branch called "partner", I did
+	git checkout v3.0 -b partner
+    To apply my partner's patch, I did
+	git am partner-formatted-patch.txt
+    To build it, I ran
+	./bootstrap
+	./configure
+	make
+    To ensure that it works, I did
+	src/diff . -
+	src/diff --help
+    And ensured that all apostrophes were properly formatted.
+
+9.) To verify that my ChangeLog entry works, I did
+	make distdir
+    Which created a new directory containing my partner's patch.
+    I then entered it to observe the ChangeLog, ensuring that it 
+    is the same as my partner's.
+
+10.) I installed Xming for windows and configured it for use with PuTTy.
+     I ran the commands
+	cd ~eggert/scr/gnu/emacs
+	gitk
+     And took a screenshot of the window that opened as a result.
